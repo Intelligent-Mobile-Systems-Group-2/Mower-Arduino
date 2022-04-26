@@ -5,8 +5,6 @@
 #include <math.h>       
 
 
-
-
 MeGyro gyro_0(0, 0x69);
 MeEncoderOnBoard Encoder_1(SLOT1);
 MeEncoderOnBoard Encoder_2(SLOT2);
@@ -82,7 +80,7 @@ void setup() {
   String y;
   
   float currentRPM;
-  float diameter;
+  float diameter; 
   float pi;
   float currentVelocityInInch;
   float currentVelocityInCm;
@@ -92,31 +90,32 @@ void setup() {
   int lenght;
   
   while(1) {
-   
+    pi = 3.1415926535897;
     GyX = gyro_0.getAngle(1); 
     GyY = gyro_0.getAngle(2); 
     GyZ = gyro_0.getAngle(3);
-    pi = 3.1415926535897;
+    
 
-    currentRPM = Encoder_1.getCurrentSpeed(); // hatighet när den kör höger vänster if satser
-    diameter = 2.36220472;
+    currentRPM = Encoder_1.getCurrentSpeed(); 
+    diameter = 1.57480315; // Inch
     Gx = String(GyX);
     Gy = String(GyY);
     Gz = String(GyZ);
     RPM = String(currentRPM);
-    currentVelocityInInch = (currentRPM * ( diameter*pi))/60; //inch/sec
-    currentVelocityInCm = currentVelocityInInch * (-2.54);  //cm/sec
+    currentVelocityInInch = (currentRPM * ( diameter*pi))/60; //inch per sec
+    currentVelocityInCm = currentVelocityInInch * (-2.54);  //cm per sec
     velocity = String(currentVelocityInCm);
     
-    lenght = currentVelocityInCm/4;   // s = v/t
+    lenght = currentVelocityInCm*1;   // s = v*t
     
-    //Cx = sin(GyZ * pi / 180) * lenght;
-    //Cy = cos(GyZ * pi / 180) * lenght;
-    Cx =  Cx + currentVelocityInCm * cos(GyZ*0.0174532925);
-    Cy =  Cy + currentVelocityInCm * sin(GyZ*0.0174532925);
+    Cx = Cx + cos(GyZ * pi / 180) * lenght;
+    Cy = Cx + sin(GyZ * pi / 180) * lenght;
+    //Cx =  Cx + currentVelocityInCm * cos(GyZ*0.0174532925);
+    //Cy =  Cy + currentVelocityInCm * sin(GyZ*0.0174532925);
     
-    x = String(Cx / 100);
-    y = String(Cy / 100);
+    
+    x = String(Cx);
+    y = String(Cy);
     
     if (Serial.available() > 0) {
       data = Serial.readStringUntil('\n');
@@ -124,45 +123,75 @@ void setup() {
     }
       Serial.print("X value :"+ x + "X speed = "+ (currentVelocityInCm * cos(GyZ*0.0174532925)) / 100);
       Serial.print(",");
-      Serial.print("Y value :" + y + "Y speed = "+ (currentVelocityInCm * sin(GyZ*0.0174532925)) / 100);
+      Serial.print("Y value :" + y + "Y speed = "+ (currentVelocityInCm * sin(GyZ*0.0174532925)) / 100 + "vinkel"+ GyZ );
       Serial.println();
       delay(300);
 
+    char *cstr = &data[0];
     
-    //if ( data == "goForward" ){
-      move(1, 15 / 100.0 * 255);
-    //}
-    if((0?(3==0?linefollower_9.readSensors()==0:(linefollower_9.readSensors() & 3)==3):(3==0?linefollower_9.readSensors()==3:(linefollower_9.readSensors() & 3)==0))){
+
+      switch(*cstr){
+        case 'F':
+           move(1, 30 / 100.0 * 255);
+           break;
+        case 'B':
           move(2, 30 / 100.0 * 255);
-          _delay(1);
-          move(2, 0);
-
-          move(4, 15 / 100.0 * 255);
-          _delay(1);
-          move(4, 0);
-
+          break;
+        case 'R':
+          move(4, 30 / 100.0 * 255);
+          break;     
+        case 'L':
+          move(3, 30 / 100.0 * 255);
+          break;     
+        case 'G':
+              //if ( data == "goForward" ){
+            move(1, 30 / 100.0 * 255);
+          //}
+          if((0?(3==0?linefollower_9.readSensors()==0:(linefollower_9.readSensors() & 3)==3):(3==0?linefollower_9.readSensors()==3:(linefollower_9.readSensors() & 3)==0))){
+       
+              move(2, 40 / 100.0 * 255);
+              _delay(1);
+              move(2, 0);
+              if(random(1, 2 +1) == 2.000000){
+                  move(4, 35 / 100.0 * 255);
+                  _delay(1);
+                  move(4, 0);
+              }else{
+                  move(3, 35 / 100.0 * 255);
+                  _delay(1);
+                  move(3, 0);
+              }
+              move(1, 40 / 100.0 * 255);
+      
+            }
+            if( ultrasonic_10.distanceCm() <= 20 && ultrasonic_10.distanceCm() > 11){
+                Serial.print("takePic");
+                Serial.print(",");
+                Serial.print(Gz);
+                Serial.print(",");
+                Serial.print(velocity);
+                Serial.println();
+                delay(300);
+            }
+            if(ultrasonic_10.distanceCm() < 10){          
+      
+              move(2, 40 / 100.0 * 255);
+              _delay(1);
+              move(2, 0);
+              if(random(1, 2 +1) == 2.000000){
+                  move(4, 40 / 100.0 * 255);
+                  _delay(1);
+                  move(4, 0);
+              }else{
+                  move(3, 40 / 100.0 * 255);
+                  _delay(1);
+                  move(3, 0);
+              }
+              move(1, 40 / 100.0 * 255);
+            }
+        break;
       }
-      if( ultrasonic_10.distanceCm() <= 20 && ultrasonic_10.distanceCm() > 11){
-          Serial.print("takePic");
-          Serial.print(",");
-          Serial.print(Gz);
-          Serial.print(",");
-          Serial.print(velocity);
-
-          Serial.println();
-          delay(300);
-      }
-      if(ultrasonic_10.distanceCm() < 10){          
-
-          move(2, 30 / 100.0 * 255);
-          _delay(1);
-          move(2, 0);
-
-          move(4, 15 / 100.0 * 255);
-          _delay(1);
-          move(4, 0);
-
-      }
+      
 
       _loop();
   }
