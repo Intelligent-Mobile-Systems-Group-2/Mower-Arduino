@@ -70,49 +70,42 @@ void setup() {
   randomSeed((unsigned long)(lightsensor_12.read() * 123456));
   
   String data = "";
-  String Gx;
-  String Gy;
-  String Gz;
-  String RPM;
-  String velocity;
+  String Gz, RPM, velocity, x, y ;
 
-  String x;
-  String y;
-  
-  float currentRPM;
+  float currentRPM1, currentRPM2, currentRPM;
   float diameter; 
-  float pi;
   float currentVelocityInInch;
   float currentVelocityInCm;
-  int GyX, GyY, GyZ; 
+  int GyZ; 
   float Cx =0;
   float Cy =0;
   int lenght;
+
   
   while(1) {
-    pi = 3.1415926535897;
-    GyX = gyro_0.getAngle(1); 
-    GyY = gyro_0.getAngle(2); 
     GyZ = gyro_0.getAngle(3);
+  
+    currentRPM1 = Encoder_1.getCurrentSpeed(); 
+    currentRPM2 = -Encoder_2.getCurrentSpeed();
+    currentRPM = (currentRPM1 + currentRPM2) / 2;
     
+    diameter = 5; // cm
 
-    currentRPM = Encoder_1.getCurrentSpeed(); 
-    diameter = 1.57480315; // Inch
-    Gx = String(GyX);
-    Gy = String(GyY);
     Gz = String(GyZ);
     RPM = String(currentRPM);
-    currentVelocityInInch = (currentRPM * ( diameter*pi))/60; //inch per sec
+    
+    currentVelocityInInch = (currentRPM * ( diameter*PI))/60; //inch per sec
     currentVelocityInCm = currentVelocityInInch * (-2.54);  //cm per sec
+
+    //currentVelocityInCm = (2*PI*(diameter/2)) / (currentRPM/60);
     velocity = String(currentVelocityInCm);
     
-    lenght = currentVelocityInCm*1;   // s = v*t
+    lenght = currentVelocityInCm * 1;   // s = v*t
     
-    Cx = Cx + cos(GyZ * pi / 180) * lenght;
-    Cy = Cx + sin(GyZ * pi / 180) * lenght;
-    //Cx =  Cx + currentVelocityInCm * cos(GyZ*0.0174532925);
-    //Cy =  Cy + currentVelocityInCm * sin(GyZ*0.0174532925);
-    
+    //Cx = Cx + cos(GyZ * PI / 180) * lenght;
+    //Cy = Cy + sin(GyZ * PI / 180) * lenght;
+    Cx =  Cx + currentVelocityInCm * cos(GyZ*0.0174532925);
+    Cy =  Cy + currentVelocityInCm * sin(GyZ*0.0174532925);
     
     x = String(Cx);
     y = String(Cy);
@@ -121,15 +114,15 @@ void setup() {
       data = Serial.readStringUntil('\n');
       //Serial.println(data);
     }
-      Serial.print("X value :"+ x + "X speed = "+ (currentVelocityInCm * cos(GyZ*0.0174532925)) / 100);
+
+      Serial.print("X value :" + x);
       Serial.print(",");
-      Serial.print("Y value :" + y + "Y speed = "+ (currentVelocityInCm * sin(GyZ*0.0174532925)) / 100 + "vinkel"+ GyZ );
+      Serial.print("Y value :" + y);
       Serial.println();
       delay(300);
-
+      
     char *cstr = &data[0];
-    
-
+   
       switch(*cstr){
         case 'F':
            move(1, 30 / 100.0 * 255);
@@ -138,43 +131,23 @@ void setup() {
           move(2, 30 / 100.0 * 255);
           break;
         case 'R':
-          move(4, 30 / 100.0 * 255);
+          move(4, 40 / 100.0 * 255);
           break;     
         case 'L':
-          move(3, 30 / 100.0 * 255);
+          move(3, 40 / 100.0 * 255);
           break;     
         case 'G':
               //if ( data == "goForward" ){
-            move(1, 30 / 100.0 * 255);
+            move(1, 40 / 100.0 * 255);
           //}
           if((0?(3==0?linefollower_9.readSensors()==0:(linefollower_9.readSensors() & 3)==3):(3==0?linefollower_9.readSensors()==3:(linefollower_9.readSensors() & 3)==0))){
-       
-              move(2, 40 / 100.0 * 255);
-              _delay(1);
-              move(2, 0);
-              if(random(1, 2 +1) == 2.000000){
-                  move(4, 35 / 100.0 * 255);
-                  _delay(1);
-                  move(4, 0);
-              }else{
-                  move(3, 35 / 100.0 * 255);
-                  _delay(1);
-                  move(3, 0);
-              }
-              move(1, 40 / 100.0 * 255);
-      
-            }
-            if( ultrasonic_10.distanceCm() <= 20 && ultrasonic_10.distanceCm() > 11){
-                Serial.print("takePic");
-                Serial.print(",");
-                Serial.print(Gz);
-                Serial.print(",");
-                Serial.print(velocity);
-                Serial.println();
-                delay(300);
-            }
-            if(ultrasonic_10.distanceCm() < 10){          
-      
+              Serial.print("lineDetected");
+              Serial.print(",");
+              Serial.print(x);
+              Serial.print(",");
+              Serial.print(y);
+              Serial.println();
+              delay(300);
               move(2, 40 / 100.0 * 255);
               _delay(1);
               move(2, 0);
@@ -188,8 +161,41 @@ void setup() {
                   move(3, 0);
               }
               move(1, 40 / 100.0 * 255);
+      
+            }
+            if( ultrasonic_10.distanceCm() <= 20 && ultrasonic_10.distanceCm() > 11){
+                Serial.print("objectDetected");
+                Serial.print(",");
+                Serial.print(x);
+                Serial.print(",");
+                Serial.print(y);
+                Serial.println();
+                delay(300);
+            }
+            if(ultrasonic_10.distanceCm() < 10){          
+
+              move(2, 40 / 100.0 * 255);
+              _delay(1);
+              move(2, 0);
+              if(random(1, 2 +1) == 1){
+                  move(4, 40 / 100.0 * 255);
+                  _delay(1);
+                  move(4, 0);
+              }else{
+                  move(3, 40 / 100.0 * 255);
+                  _delay(1);
+                  move(3, 0);
+              }
+              move(1, 40 / 100.0 * 255);
             }
         break;
+        case 'T':
+          if(Cx < 100 && Cy < 100){
+             move(1,40 / 100.0 * 255);
+            }
+           else{
+             move(3,40 / 100.0 * 255);
+           }
       }
       
 
