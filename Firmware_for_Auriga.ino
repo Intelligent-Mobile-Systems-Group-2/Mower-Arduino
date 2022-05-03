@@ -73,40 +73,50 @@ void setup() {
   String Gz, RPM, velocity, x, y ;
 
   float currentRPM1, currentRPM2, currentRPM;
-  float diameter; 
-  float currentVelocityInInch;
-  float currentVelocityInCm;
-  int GyZ; 
+  float radius; 
+  float angularSpeed, mowerSpeed;
+  float GyZ; 
   float Cx =0;
   float Cy =0;
-  int lenght;
 
   
   while(1) {
+    // GyZ is the degree of Z angle from Gyro 
     GyZ = gyro_0.getAngle(3);
-  
+    
+    // Get the average of the speed of both motors 
     currentRPM1 = Encoder_1.getCurrentSpeed(); 
     currentRPM2 = -Encoder_2.getCurrentSpeed();
     currentRPM = (currentRPM1 + currentRPM2) / 2;
-    
-    diameter = 5; // cm
 
+    // the radius of the wheel in cm
+    radius = 2;
+
+    // convert the Z angle and the current speed to strings 
     Gz = String(GyZ);
     RPM = String(currentRPM);
-    
-    currentVelocityInInch = (currentRPM * ( diameter*PI))/60; //inch per sec
-    currentVelocityInCm = currentVelocityInInch * (-2.54);  //cm per sec
 
-    //currentVelocityInCm = (2*PI*(diameter/2)) / (currentRPM/60);
-    velocity = String(currentVelocityInCm);
+    // calculate the angular speed 
+    angularSpeed = currentRPM * 2 * PI/60; 
+    //angularSpeed = (2*PI*(radius/2)) / (currentRPM/60);
+
+    //calculate the speed v=rω   cm/s
+    mowerSpeed = radius * angularSpeed;
     
-    lenght = currentVelocityInCm * 1;   // s = v*t
+
+
+    // convert the velocity of the mower to string
+    //velocity = String(mowerSpeed);
     
+    //lenght = angularSpeed * 1;   // s = v*t
+
+    // calculate X and Y coordinates
     //Cx = Cx + cos(GyZ * PI / 180) * lenght;
     //Cy = Cy + sin(GyZ * PI / 180) * lenght;
-    Cx =  Cx + currentVelocityInCm * cos(GyZ*0.0174532925);
-    Cy =  Cy + currentVelocityInCm * sin(GyZ*0.0174532925);
-    
+    Cx =  Cx + mowerSpeed * cos(GyZ * PI / 180);
+    Cy =  Cy + mowerSpeed * sin(GyZ * PI / 180);
+
+    //convert X and Y to strings
     x = String(Cx);
     y = String(Cy);
     
