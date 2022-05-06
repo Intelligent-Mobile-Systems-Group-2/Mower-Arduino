@@ -56,6 +56,34 @@ void _delay(float seconds) {
   while(millis() < endTime) _loop();
 }
 
+void randomMoving(){
+     if(random(1, 2 +1) == 1){
+        move(3, 40 / 100.0 * 255);
+        _delay(1);
+        move(4, 0);
+    }else{
+        move(4, 40 / 100.0 * 255);
+        _delay(1);
+        move(3, 0);
+    }
+}
+
+void moveForward(){
+    move(1, 40 / 100.0 * 255);
+}
+
+void moveBackward(){
+    move(2, 40 / 100.0 * 255);
+}
+
+void moveRight(){
+  move(4, 40 / 100.0 * 255);
+}
+
+void moveLeft(){
+  move(3, 40 / 100.0 * 255);
+}
+
 void setup() {
   Serial.begin(9600);
   gyro_0.begin();
@@ -70,7 +98,9 @@ void setup() {
   randomSeed((unsigned long)(lightsensor_12.read() * 123456));
   
   String data = "";
-  String Gz, pulse, x, y ;
+  String Gz, pulse, x, y;
+
+  String detecttion = "NothingDetection";
 
   float currentPulse1, currentPulse2, currentPulse;
   float GyZ; 
@@ -109,76 +139,56 @@ void setup() {
       Serial.print(",");
       Serial.print("Y value :" + y);
       Serial.println();
-      delay(300);
+      //delay(300);
 
-    //char *cstr = &data[0];
+      //char *cstr = &data[0];
       char cstr = 'G';
-      //switch(*cstr){
       switch(cstr){
-
+      //switch(*cstr){
         case 'F':
-           move(1, 30 / 100.0 * 255);
+           moveForward();
            break;
         case 'B':
-          move(2, 30 / 100.0 * 255);
+          moveBackward();
           break;
         case 'R':
-          move(4, 40 / 100.0 * 255);
+          moveRight();
           break;     
         case 'L':
-          move(3, 40 / 100.0 * 255);
+          moveLeft();
           break;     
         case 'G':
-            move(1, 40 / 100.0 * 255);
-          //if(linefollower_9.readSensors() != 3.0){
-          if(linefollower_9.readSensors() == 0.000){
-
-              Serial.print("lineDetected");
-              Serial.print(",");
-              Serial.print(x);
-              Serial.print(",");
-              Serial.print(y);
-              Serial.println();
-              delay(300);
-              move(2, 40 / 100.0 * 255);
+          moveForward();
+          if(linefollower_9.readSensors() == 0){
+              move(2, 30 / 100.0 * 255);
               _delay(1);
               move(2, 0);
-              if(random(1, 2 +1) == 2.000000){
-                  move(4, 40 / 100.0 * 255);
-                  _delay(1);
-                  move(4, 0);
-              }else{
-                  move(3, 40 / 100.0 * 255);
-                  _delay(1);
-                  move(3, 0);
-              }
-              move(1, 40 / 100.0 * 255);
-      
+              randomMoving();
+              moveForward();
+              Serial.print("lineDetected");
+              Serial.print(",");
+              Serial.print("X value :" + x);
+              Serial.print(",");
+              Serial.print("Y value :" + y);
+              Serial.println();
             }
+              
             if( ultrasonic_10.distanceCm() <= 20 && ultrasonic_10.distanceCm() > 11){
                 Serial.print("objectDetected");
                 Serial.print(",");
-                Serial.print(x);
+                Serial.print("X value :" + x);
                 Serial.print(",");
-                Serial.print(y);
+                Serial.print("Y value :" + y);
                 Serial.println();
-                delay(300);
             }
+            
             if(ultrasonic_10.distanceCm() < 10){          
 
               move(2, 40 / 100.0 * 255);
               _delay(1);
               move(2, 0);
-              if(random(1, 2 +1) == 1){
-                  move(4, 40 / 100.0 * 255);
-                  _delay(1);
-                  move(4, 0);
-              }else{
-                  move(3, 40 / 100.0 * 255);
-                  _delay(1);
-                  move(3, 0);
-              }
-              move(1, 40 / 100.0 * 255);
+              randomMoving();
+              moveForward();
             }
         break;
         case 'T':
@@ -189,7 +199,7 @@ void setup() {
                 move(1 ,40 / 100.0 * 255);
              }
             }
-      }
+      }      
       _loop();
   }
 
