@@ -100,8 +100,6 @@ void setup() {
   String data = "";
   String Gz, pulse, x, y;
 
-  String detecttion = "NothingDetection";
-
   float currentPulse1, currentPulse2, currentPulse;
   float GyZ; 
   int Cx;
