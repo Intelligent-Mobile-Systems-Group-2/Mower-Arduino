@@ -4,6 +4,17 @@
 #include <MeAuriga.h>
 #include <math.h>       
 
+//pulse/ distance   6465 / 232 == 0.0359355
+#define ENCODER_PULSE_PER_CM 0.0359355
+
+String data = "";
+// x and y as strings to them as strings to backend
+String x, y;
+float currentPulse1, currentPulse2, averageCurrentPulse;
+float GyZ; 
+int Cx = 0;
+int Cy = 0;
+
 MeGyro gyro_0(0, 0x69);
 MeEncoderOnBoard Encoder_1(SLOT1);
 MeEncoderOnBoard Encoder_2(SLOT2);
@@ -58,22 +69,22 @@ void _delay(float seconds) {
 
 void randomMoving(){
      if(random(1, 2 +1) == 1){
-        move(3, 40 / 100.0 * 255);
+        move(4, 40 / 100.0 * 255);
         _delay(1);
         move(4, 0);
     }else{
         move(4, 40 / 100.0 * 255);
         _delay(1);
-        move(3, 0);
+        move(4, 0);
     }
 }
 
 void moveForward(){
-    move(1, 40 / 100.0 * 255);
+    move(1, 50 / 100.0 * 255);
 }
 
 void moveBackward(){
-    move(2, 40 / 100.0 * 255);
+    move(2, 50 / 100.0 * 255);
 }
 
 void moveRight(){
@@ -84,6 +95,31 @@ void moveLeft(){
   move(3, 40 / 100.0 * 255);
 }
 
+void resetEncoderPulse(){
+  Encoder_1.setPulsePos(0);
+  Encoder_2.setPulsePos(0);
+    
+}
+
+
+void calculateXY(){
+
+    // GyZ is the degree of Z angle from Gyro sensor
+    GyZ = gyro_0.getAngle(3);
+    
+    // Get the average pulse of both motors 
+    currentPulse1 = -Encoder_1.getPulsePos(); 
+    currentPulse2 = Encoder_2.getPulsePos();
+    averageCurrentPulse= (currentPulse1 + currentPulse2) / 2;
+
+
+    Cx = Cx + averageCurrentPulse* ENCODER_PULSE_PER_CM * cos(GyZ * PI / 180);
+    Cy = Cy + averageCurrentPulse* ENCODER_PULSE_PER_CM * sin(GyZ * PI / 180);
+    x = String(Cx);
+    y = String(Cy);
+    resetEncoderPulse();
+    
+}
 void setup() {
   Serial.begin(9600);
   gyro_0.begin();
@@ -97,48 +133,10 @@ void setup() {
   attachInterrupt(Encoder_2.getIntNum(), isr_process_encoder2, RISING);
   randomSeed((unsigned long)(lightsensor_12.read() * 123456));
   
-  String data = "";
-  String Gz, pulse, x, y;
-
-  float currentPulse1, currentPulse2, currentPulse;
-  float GyZ; 
-  int Cx;
-  int Cy;
-  float cmPerPulse = 0.0359355;     //currentPulse / distance   6465 / 232 == 0.0359355
-
-  while(1) {
-    // GyZ is the degree of Z angle from Gyro 
-    GyZ = gyro_0.getAngle(3);
-    
-    // Get the average of the pulse of both motors 
-    currentPulse1 = -Encoder_1.getPulsePos(); 
-    currentPulse2 = Encoder_2.getPulsePos();
-    currentPulse = (currentPulse1 + currentPulse2) / 2;
-
-    // convert the Z angle and the current speed to strings 
-    Gz = String(GyZ);
-    pulse = String(currentPulse);
-    Cx =   currentPulse * cmPerPulse * cos(GyZ * PI / 180);
-    Cy =   currentPulse * cmPerPulse * sin(GyZ * PI / 180);
-    //currentPulse = 0;
-   
-
-    //convert X and Y to strings
-    x = String(Cx);
-    y = String(Cy);
-   
+  while(1) { 
     if (Serial.available() > 0) {
       data = Serial.readStringUntil('\n');
-      //Serial.println(data);
     }
-      Serial.print("NothingDetected");
-      Serial.print(",");
-      Serial.print("X value :" + x );
-      Serial.print(",");
-      Serial.print("Y value :" + y);
-      Serial.println();
-      //delay(300);
-
       //char *cstr = &data[0];
       char cstr = 'G';
       switch(cstr){
@@ -163,6 +161,7 @@ void setup() {
               move(2, 0);
               randomMoving();
               moveForward();
+              calculateXY();
               Serial.print("lineDetected");
               Serial.print(",");
               Serial.print("X value :" + x);
@@ -170,8 +169,8 @@ void setup() {
               Serial.print("Y value :" + y);
               Serial.println();
             }
-              
             if( ultrasonic_10.distanceCm() <= 20 && ultrasonic_10.distanceCm() > 11){
+                calculateXY();
                 Serial.print("objectDetected");
                 Serial.print(",");
                 Serial.print("X value :" + x);
@@ -179,9 +178,7 @@ void setup() {
                 Serial.print("Y value :" + y);
                 Serial.println();
             }
-            
             if(ultrasonic_10.distanceCm() < 10){          
-
               move(2, 40 / 100.0 * 255);
               _delay(1);
               move(2, 0);
