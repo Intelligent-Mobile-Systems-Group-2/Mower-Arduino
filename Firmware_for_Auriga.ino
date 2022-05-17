@@ -80,11 +80,11 @@ void randomMoving(){
 }
 
 void moveForward(){
-    move(1, 50 / 100.0 * 255);
+    move(1, 40 / 100.0 * 255);
 }
 
 void moveBackward(){
-    move(2, 50 / 100.0 * 255);
+    move(2, 40 / 100.0 * 255);
 }
 
 void moveRight(){
@@ -95,12 +95,16 @@ void moveLeft(){
   move(3, 40 / 100.0 * 255);
 }
 
-void resetEncoderPulse(){
-  Encoder_1.setPulsePos(0);
-  Encoder_2.setPulsePos(0);
-    
+void moveBackwardFor2Sec(){
+  move(2, 40 / 100.0 * 255);
+  _delay(1);
+  move(2, 0);
 }
 
+void resetEncoderPulse(){
+  Encoder_1.setPulsePos(0);
+  Encoder_2.setPulsePos(0);   
+}
 
 void calculateXY(){
 
@@ -111,7 +115,6 @@ void calculateXY(){
     currentPulse1 = -Encoder_1.getPulsePos(); 
     currentPulse2 = Encoder_2.getPulsePos();
     averageCurrentPulse= (currentPulse1 + currentPulse2) / 2;
-
 
     Cx = Cx + averageCurrentPulse* ENCODER_PULSE_PER_CM * cos(GyZ * PI / 180);
     Cy = Cy + averageCurrentPulse* ENCODER_PULSE_PER_CM * sin(GyZ * PI / 180);
@@ -137,10 +140,10 @@ void setup() {
     if (Serial.available() > 0) {
       data = Serial.readStringUntil('\n');
     }
-      //char *cstr = &data[0];
-      char cstr = 'G';
-      switch(cstr){
-      //switch(*cstr){
+      char *cstr = &data[0];
+      //char cstr = 'G';
+      //switch(cstr){
+      switch(*cstr){
         case 'F':
            moveForward();
            break;
@@ -156,9 +159,7 @@ void setup() {
         case 'G':
           moveForward();
           if(linefollower_9.readSensors() == 0){
-              move(2, 30 / 100.0 * 255);
-              _delay(1);
-              move(2, 0);
+              moveBackwardFor2Sec();
               randomMoving();
               moveForward();
               calculateXY();
@@ -179,9 +180,7 @@ void setup() {
                 Serial.println();
             }
             if(ultrasonic_10.distanceCm() < 10){          
-              move(2, 40 / 100.0 * 255);
-              _delay(1);
-              move(2, 0);
+              moveBackwardFor2Sec();
               randomMoving();
               moveForward();
             }
