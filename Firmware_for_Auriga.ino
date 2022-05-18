@@ -4,16 +4,16 @@
 #include <MeAuriga.h>
 #include <math.h>       
 
-//pulse/ distance   6465 / 232 == 0.0359355
+//The value represents how many pulses the motor performs per centimeter. Pulse/distance - 6465 / 232 == 0.0359355
 #define ENCODER_PULSE_PER_CM 0.0359355
 
 String data = "";
-// x and y as strings to them as strings to backend
+// x and y as strings to send them as strings to the backend
 String x, y;
 float currentPulse1, currentPulse2, averageCurrentPulse;
 float GyZ; 
-int Cx = 0;
-int Cy = 0;
+int xCoordinates = 0;
+int yCoordinates = 0;
 
 MeGyro gyro_0(0, 0x69);
 MeEncoderOnBoard Encoder_1(SLOT1);
@@ -67,6 +67,7 @@ void _delay(float seconds) {
   while(millis() < endTime) _loop();
 }
 
+// The function makes the mower move right or left randomly.
 void randomMoving(){
      if(random(1, 2 +1) == 1){
         move(4, 40 / 100.0 * 255);
@@ -106,6 +107,7 @@ void resetEncoderPulse(){
   Encoder_2.setPulsePos(0);   
 }
 
+//The function calculates the value of X and Y and resets the pulse of the motor after each calculation.
 void calculateXY(){
 
     // GyZ is the degree of Z angle from Gyro sensor
@@ -116,17 +118,16 @@ void calculateXY(){
     currentPulse2 = Encoder_2.getPulsePos();
     averageCurrentPulse= (currentPulse1 + currentPulse2) / 2;
 
-    Cx = Cx + averageCurrentPulse* ENCODER_PULSE_PER_CM * cos(GyZ * PI / 180);
-    Cy = Cy + averageCurrentPulse* ENCODER_PULSE_PER_CM * sin(GyZ * PI / 180);
-    x = String(Cx);
-    y = String(Cy);
+    xCoordinates = xCoordinates + averageCurrentPulse* ENCODER_PULSE_PER_CM * cos(GyZ * PI / 180);
+    yCoordinates = yCoordinates + averageCurrentPulse* ENCODER_PULSE_PER_CM * sin(GyZ * PI / 180);
+    x = String(xCoordinates);
+    y = String(yCoordinates);
     resetEncoderPulse();
     
 }
 void setup() {
   Serial.begin(9600);
   gyro_0.begin();
-
 
   TCCR1A = _BV(WGM10);
   TCCR1B = _BV(CS11) | _BV(WGM12);
@@ -165,18 +166,18 @@ void setup() {
               calculateXY();
               Serial.print("lineDetected");
               Serial.print(",");
-              Serial.print("X value :" + x);
+              Serial.print(x);
               Serial.print(",");
-              Serial.print("Y value :" + y);
+              Serial.print(y);
               Serial.println();
             }
             if( ultrasonic_10.distanceCm() <= 20 && ultrasonic_10.distanceCm() > 11){
                 calculateXY();
                 Serial.print("objectDetected");
                 Serial.print(",");
-                Serial.print("X value :" + x);
+                Serial.print(x);
                 Serial.print(",");
-                Serial.print("Y value :" + y);
+                Serial.print(y);
                 Serial.println();
             }
             if(ultrasonic_10.distanceCm() < 10){          
@@ -185,14 +186,6 @@ void setup() {
               moveForward();
             }
         break;
-        case 'T':
-          move(1 ,40 / 100.0 * 255);
-          if(Cx > 100){
-             move(2 ,40 / 100.0 * 255);
-             if (Cx == -1){
-                move(1 ,40 / 100.0 * 255);
-             }
-            }
       }      
       _loop();
   }
