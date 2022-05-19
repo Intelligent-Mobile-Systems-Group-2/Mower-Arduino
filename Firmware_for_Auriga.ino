@@ -5,8 +5,7 @@
 #include <math.h>       
 
 //The value represents how many pulses the motor performs per centimeter. Pulse/distance - 232 /6465 = 0.0359355
-//#define ENCODER_PULSE_PER_CM 0.0359355
-#define ENCODER_PULSE_PER_CM 0.0412195    // 169 / 4100
+#define ENCODER_PULSE_PER_CM 0.033719174  // 134 / 3974
 
 String data = "";
 // x and y as strings to send them as strings to the backend
