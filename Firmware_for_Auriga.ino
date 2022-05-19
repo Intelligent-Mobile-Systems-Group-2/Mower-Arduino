@@ -71,13 +71,13 @@ void _delay(float seconds) {
 // The function makes the mower move right or left randomly.
 void randomMoving(){
      if(random(1, 2 +1) == 1){
-        move(4, 40 / 100.0 * 255);
+        move(3, 40 / 100.0 * 255);
         _delay(1);
         move(4, 0);
     }else{
         move(4, 40 / 100.0 * 255);
         _delay(1);
-        move(4, 0);
+        move(3, 0);
     }
 }
 
