@@ -177,7 +177,7 @@ void setup() {
               Serial.print(y);
               Serial.println();
             }
-           else if( ultrasonic_10.distanceCm() <= 15 && ultrasonic_10.distanceCm() > 11){
+           else if( ultrasonic_10.distanceCm() <= 12 && ultrasonic_10.distanceCm() > 11){
                 calculateXY();
                 Serial.print("objectDetected");
                 Serial.print(",");
@@ -185,6 +185,7 @@ void setup() {
                 Serial.print(",");
                 Serial.print(y);
                 Serial.println();
+                delay(20);
             }
             if(ultrasonic_10.distanceCm() < 10){          
               moveBackwardFor2Sec();
