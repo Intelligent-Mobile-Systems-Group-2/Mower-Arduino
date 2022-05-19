@@ -4,8 +4,9 @@
 #include <MeAuriga.h>
 #include <math.h>       
 
-//The value represents how many pulses the motor performs per centimeter. Pulse/distance - 6465 / 232 == 0.0359355
-#define ENCODER_PULSE_PER_CM 0.0359355
+//The value represents how many pulses the motor performs per centimeter. Pulse/distance - 232 /6465 = 0.0359355
+//#define ENCODER_PULSE_PER_CM 0.0359355
+#define ENCODER_PULSE_PER_CM 0.0412195    // 169 / 4100
 
 String data = "";
 // x and y as strings to send them as strings to the backend
@@ -70,13 +71,13 @@ void _delay(float seconds) {
 // The function makes the mower move right or left randomly.
 void randomMoving(){
      if(random(1, 2 +1) == 1){
-        move(3, 40 / 100.0 * 255);
+        move(4, 40 / 100.0 * 255);
         _delay(1);
         move(4, 0);
     }else{
         move(4, 40 / 100.0 * 255);
         _delay(1);
-        move(3, 0);
+        move(4, 0);
     }
 }
 
@@ -107,6 +108,12 @@ void resetEncoderPulse(){
   Encoder_2.setPulsePos(0);   
 }
 
+void stopMoving(){
+  Encoder_1.setTarPWM(0);
+  Encoder_2.setTarPWM(0);
+  _delay(0.5);
+}
+
 //The function calculates the value of X and Y and resets the pulse of the motor after each calculation.
 void calculateXY(){
 
@@ -123,8 +130,8 @@ void calculateXY(){
     x = String(xCoordinates);
     y = String(yCoordinates);
     resetEncoderPulse();
-    
 }
+
 void setup() {
   Serial.begin(9600);
   gyro_0.begin();
@@ -136,7 +143,6 @@ void setup() {
   attachInterrupt(Encoder_1.getIntNum(), isr_process_encoder1, RISING);
   attachInterrupt(Encoder_2.getIntNum(), isr_process_encoder2, RISING);
   randomSeed((unsigned long)(lightsensor_12.read() * 123456));
-  
   while(1) { 
     if (Serial.available() > 0) {
       data = Serial.readStringUntil('\n');
@@ -171,7 +177,7 @@ void setup() {
               Serial.print(y);
               Serial.println();
             }
-            if( ultrasonic_10.distanceCm() <= 20 && ultrasonic_10.distanceCm() > 11){
+           else if( ultrasonic_10.distanceCm() <= 15 && ultrasonic_10.distanceCm() > 11){
                 calculateXY();
                 Serial.print("objectDetected");
                 Serial.print(",");
@@ -186,10 +192,13 @@ void setup() {
               moveForward();
             }
         break;
+       case 'S':
+        stopMoving();
+        break;
+        
       }      
       _loop();
   }
-
 }
 
 void _loop() {
