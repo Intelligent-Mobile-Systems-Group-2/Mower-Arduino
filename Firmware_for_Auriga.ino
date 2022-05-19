@@ -4,8 +4,8 @@
 #include <MeAuriga.h>
 #include <math.h>       
 
-//The value represents how many pulses the motor performs per centimeter. Pulse/distance - 232 /6465 = 0.0359355
-#define ENCODER_PULSE_PER_CM 0.033719174  // 134 / 3974
+//The value represents how many pulses the motor performs per centimeter.
+#define ENCODER_PULSE_PER_CM 0.033719174  // 134 cm / 3974 pulses
 
 String data = "";
 // x and y as strings to send them as strings to the backend
@@ -102,6 +102,7 @@ void moveBackwardFor2Sec(){
   move(2, 0);
 }
 
+//The function reset the value of the pulse
 void resetEncoderPulse(){
   Encoder_1.setPulsePos(0);
   Encoder_2.setPulsePos(0);   
@@ -146,9 +147,8 @@ void setup() {
     if (Serial.available() > 0) {
       data = Serial.readStringUntil('\n');
     }
+    //The char is the first character of the RPI command.
       char *cstr = &data[0];
-      //char cstr = 'G';
-      //switch(cstr){
       switch(*cstr){
         case 'F':
            moveForward();
@@ -161,7 +161,8 @@ void setup() {
           break;     
         case 'L':
           moveLeft();
-          break;     
+          break;  
+        // The G case is the GoRandom case. It sends the coordinates when there is a boundary or collision
         case 'G':
           moveForward();
           if(linefollower_9.readSensors() == 0){
