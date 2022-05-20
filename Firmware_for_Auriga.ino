@@ -196,7 +196,6 @@ void setup() {
        case 'S':
         stopMoving();
         break;
-        
       }      
       _loop();
   }
