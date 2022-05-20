@@ -166,10 +166,10 @@ void setup() {
         case 'G':
           moveForward();
           if(linefollower_9.readSensors() == 0){
+              calculateXY();
               moveBackwardFor2Sec();
               randomMoving();
               moveForward();
-              calculateXY();
               Serial.print("lineDetected");
               Serial.print(",");
               Serial.print(x);
@@ -185,7 +185,7 @@ void setup() {
                 Serial.print(",");
                 Serial.print(y);
                 Serial.println();
-                delay(20);
+                delay(200);
             }
             if(ultrasonic_10.distanceCm() < 10){          
               moveBackwardFor2Sec();
