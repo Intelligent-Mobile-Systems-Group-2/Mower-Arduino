@@ -14,7 +14,6 @@ float currentPulse1, currentPulse2, averageCurrentPulse;
 float GyZ; 
 int xCoordinates = 0;
 int yCoordinates = 0;
-
 MeGyro gyro_0(0, 0x69);
 MeEncoderOnBoard Encoder_1(SLOT1);
 MeEncoderOnBoard Encoder_2(SLOT2);
@@ -116,15 +115,12 @@ void stopMoving(){
 
 //The function calculates the value of X and Y and resets the pulse of the motor after each calculation.
 void calculateXY(){
-
     // GyZ is the degree of Z angle from Gyro sensor
     GyZ = gyro_0.getAngle(3);
-    
     // Get the average pulse of both motors 
     currentPulse1 = -Encoder_1.getPulsePos(); 
     currentPulse2 = Encoder_2.getPulsePos();
     averageCurrentPulse= (currentPulse1 + currentPulse2) / 2;
-
     xCoordinates = xCoordinates + averageCurrentPulse* ENCODER_PULSE_PER_CM * cos(GyZ * PI / 180);
     yCoordinates = yCoordinates + averageCurrentPulse* ENCODER_PULSE_PER_CM * sin(GyZ * PI / 180);
     x = String(xCoordinates);
@@ -135,7 +131,6 @@ void calculateXY(){
 void setup() {
   Serial.begin(9600);
   gyro_0.begin();
-
   TCCR1A = _BV(WGM10);
   TCCR1B = _BV(CS11) | _BV(WGM12);
   TCCR2A = _BV(WGM21) | _BV(WGM20);
