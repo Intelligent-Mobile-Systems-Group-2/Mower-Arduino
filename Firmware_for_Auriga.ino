@@ -113,7 +113,7 @@ void stopMoving(){
   _delay(0.5);
 }
 
-//The function calculates the value of X and Y and resets the pulse of the motor after each calculation.
+//The function calculates the average value of the motors pulse, the value of X and Y, and resets the pulse of the motor after each calculation.
 void calculateXY(){
     // GyZ is the degree of Z angle from Gyro sensor
     GyZ = gyro_0.getAngle(3);
